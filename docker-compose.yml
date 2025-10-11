@@ -1,0 +1,37 @@
+services:
+  tests:
+    build: .
+    image: reqres-api-tests:latest
+    working_dir: /app
+    environment:
+      PYTHONPATH: /app
+      API_BASE_URL: "https://reqres.in"
+      API_X_API_KEY: "reqres-free-v1"
+      API_TIMEOUT: "20"
+      API_RETRIES: "2"
+    volumes:
+      - ./:/app
+      - ./allure-results:/app/allure-results
+    command: pytest -m "live or contract" -n auto --alluredir=allure-results
+
+  allure:
+    image: frankescobar/allure-docker-service
+    container_name: allure-service
+    ports:
+      - "5050:5050"
+    environment:
+      CHECK_RESULTS_EVERY_SECONDS: 3
+      KEEP_HISTORY: "TRUE"
+    volumes:
+      - ./allure-results:/app/allure-results
+      - ./allure-report:/app/allure-report
+
+  allure-ui:
+    image: frankescobar/allure-docker-service-ui
+    container_name: allure-ui
+    depends_on:
+      - allure
+    environment:
+      ALLURE_DOCKER_PUBLIC_API_URL: http://localhost:5050
+    ports:
+      - "5252:5252"
