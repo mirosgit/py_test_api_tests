@@ -1,5 +1,9 @@
 name: CI + Allure Pages
 
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
 on:
   push:
     branches: [ main ]
@@ -69,6 +73,7 @@ jobs:
           path: allure-report
 
   deploy:
+    if: github.ref == 'refs/heads/main'
     needs: tests-and-report
     runs-on: ubuntu-latest
     environment:
